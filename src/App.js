@@ -1,11 +1,13 @@
-import logo from "./logo.svg";
 import "./App.css";
 import OuterBox from "./OuterBox";
 
-function App() {  
+function App() {
+  function allowDrop(ev) {
+    ev.preventDefault();
+  }
   return (
-    <div className="App">
-      <OuterBox/>
+    <div className="App" onDrop={allowDrop}>
+      <OuterBox />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Point from "./Point";
 import Sharp from "./Sharp.tsx";
+import Icon from "./icon";
 
 const initPosition = {
   A: { x: 0, y: 0 },
@@ -10,13 +11,18 @@ const initPosition = {
 };
 const OuterBox = () => {
   const [position, setPosition] = useState(initPosition);
+  const [boxPosition, setBoxPosition] = useState({
+    x: 250,
+    y: 250,
+  });
+  const [transformType, setTransformType] = useState("init");
   const Scale = useMemo(() => {
     return (
       (initPosition.C.x - initPosition.A.x) /
       (initPosition.C.y - initPosition.A.y)
     );
   }, []);
-  console.log(Scale);
+  console.log(position)
   const renderPoint = () => {
     const ListPosition = [];
     for (let i = 0; i < 8; i++) {
@@ -75,30 +81,38 @@ const OuterBox = () => {
     }
     return ListPosition;
   };
-  console.log(renderPoint());
-  function allowDrop(ev) {
-    ev.preventDefault();
-  }
+
+  const handleDrag = (e) => {
+    if (e.clientX) {
+      setBoxPosition({
+        x: e.clientX,
+        y: e.clientY,
+      });
+    }
+  };
   return (
     <>
-      <svg
-        className="outerStroke"
+      <div
+        className={'outerStroke ' + transformType}
         id="outerStroke"
         style={{
-          left: 50,
-          top: 50,
-          width: 1000,
-          height: 1000,
+          left: boxPosition.x,
+          top: boxPosition.y,
+          width: Math.abs(position.B.x - position.A.x),
+          height: Math.abs(position.D.y - position.A.y),
           position: "absolute",
         }}
-        onDragOver={allowDrop}
+        onDrag={handleDrag}
+        onDragStart={(e) => console.log(e)}
+        draggable="true"
       >
-        <polygon
-          points={`${position.A.x},${position.A.y} ${position.B.x},${position.B.y} ${position.C.x},${position.C.y} ${position.D.x},${position.D.y}`}
-          stroke="red"
-          fill="none"
-        />
-      </svg>
+        <div>
+          <Icon
+            width={Math.abs(position.B.x - position.A.x)}
+            height={Math.abs(position.D.y - position.A.y)}
+          />
+        </div>
+      </div>
       {renderPoint().map((value, index) => (
         <Point
           top={value.top}
@@ -108,9 +122,11 @@ const OuterBox = () => {
           position={position}
           setPosition={setPosition}
           Scale={Scale}
+          boxPosition={boxPosition}
+          setTransformType={setTransformType}
+          transformType={transformType}
         />
       ))}
-      <Sharp />
     </>
   );
 };

@@ -49,3 +49,12 @@
   border-radius: 100%;
   cursor: pointer;
 }
+.outerStroke.left{
+  transform: scaleX(-1) translateX(100%);
+}
+.outerStroke.top{
+  transform: scaleY(-1) translateY(100%);
+}
+.outerStroke.left-top{
+  transform: scale(-1, -1) translate(100%, 100%);
+}

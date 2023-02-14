@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
 const initPosition = {
-  top: 50,
-  left: 50,
+  top: 250,
+  left: 250,
 };
-const Point = ({ top, left, type, setPosition, Scale, position }) => {
+const Point = ({
+  top,
+  left,
+  type,
+  setPosition,
+  Scale,
+  boxPosition,
+  setTransformType,
+  transformType,
+}) => {
   const [topP, setTop] = useState(top);
   const [leftP, setLeft] = useState(left);
   //   const handleDragStart = (e) => {
@@ -25,21 +34,24 @@ const Point = ({ top, left, type, setPosition, Scale, position }) => {
   //   }, [topP, leftP, type, setPosition]);
   const handleDragStart = (e) => {
     if (e.clientX) {
-      if (e.clientY - topP > e.clientX - leftP) {
-        console.log("y", e.clientY - 50);
-        console.log("x", e.clientX -50);
-
-        setLeft(leftP + (e.clientY - initPosition.top - topP) * Scale);
-        setTop(e.clientY - initPosition.top);
+      if (e.clientX <= boxPosition.x && e.clientY <= boxPosition.y) {
+        setTransformType("left-top");
+      } else if (e.clientY <= boxPosition.y) {
+        setTransformType("top");
+      } else if (e.clientX <= boxPosition.x) {
+        setTransformType("left");
       } else {
-        console.log("y", e.clientY - 50);
-        console.log("x", e.clientX -50);
-        setTop(topP + (e.clientX - initPosition.left - leftP) / Scale);
-        setLeft(e.clientX - initPosition.left);
+        setTransformType("init");
+      }
+      if (e.clientY - topP > e.clientX - leftP) {
+        setLeft(leftP + (e.clientY - boxPosition.y - topP) * Scale);
+        setTop(e.clientY - boxPosition.y);
+      } else {
+        setTop(topP + (e.clientX - boxPosition.x - leftP) / Scale);
+        setLeft(e.clientX - boxPosition.x);
       }
     }
   };
-
   useEffect(() => {
     if (type === "c") {
       setPosition({
@@ -50,17 +62,36 @@ const Point = ({ top, left, type, setPosition, Scale, position }) => {
       });
     }
   }, [topP, leftP, type, setPosition]);
-
   return (
-    <div
-      className="point"
-      style={{
-        top: topP + 50,
-        left: leftP + 50,
-        position: "absolute",
-      }}
-      onDrag={handleDragStart}
-    ></div>
+    <>
+      {transformType === "left-top" ? (
+        <div
+          className="point"
+          style={{
+            top: boxPosition?.y - topP,
+            left: boxPosition?.x - leftP,
+            position: "absolute",
+          }}
+          onDrag={handleDragStart}
+        ></div>
+      ) : (
+        <div
+          className="point"
+          style={{
+            top:
+              transformType === "top"
+                ? boxPosition?.y - topP
+                : topP + boxPosition?.y,
+            left:
+              transformType === "left"
+                ? boxPosition?.x - leftP
+                : leftP + boxPosition?.x,
+            position: "absolute",
+          }}
+          onDrag={handleDragStart}
+        ></div>
+      )}
+    </>
   );
 };
 export default Point;
