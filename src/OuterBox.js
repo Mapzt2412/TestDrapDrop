@@ -16,13 +16,26 @@ const OuterBox = () => {
     y: 250,
   });
   const [transformType, setTransformType] = useState("init");
+  const [initRotate, setInitRotate] = useState(0);
   const Scale = useMemo(() => {
     return (
       (initPosition.C.x - initPosition.A.x) /
       (initPosition.C.y - initPosition.A.y)
     );
   }, []);
-  console.log(position)
+
+  const pointCenter = useMemo(
+    () => ({
+      x:
+        (position.A.x + position.B.x + position.C.x + position.D.x) / 4 +
+        boxPosition.x,
+      y:
+        (position.A.y + position.B.y + position.C.y + position.D.y) / 4 +
+        boxPosition.y,
+    }),
+    [boxPosition, position]
+  );
+
   const renderPoint = () => {
     const ListPosition = [];
     for (let i = 0; i < 8; i++) {
@@ -81,6 +94,35 @@ const OuterBox = () => {
     }
     return ListPosition;
   };
+  let drag = "180";
+  const handleRotate = (e) => {
+    if (e.clientX) {
+      const vector = {
+        x: e.clientX - pointCenter.x,
+        y: e.clientY - pointCenter.y,
+      };
+      console.log(
+        pointCenter.x -
+          (position.A.x + boxPosition.x) * pointCenter.x -
+          e.clientX
+      );
+
+      const angle =
+        Math.acos(
+          vector.y / Math.sqrt(vector.x * vector.x + vector.y * vector.y)
+        ) *
+        (180 / Math.PI);
+      if (
+        (pointCenter.x -
+          (position.A.x + boxPosition.x)) * (pointCenter.x - e.clientX) <
+        0
+      ) {
+        setInitRotate(180 +(180 - angle) );
+        return;
+      }
+      setInitRotate(angle);
+    }
+  };
 
   const handleDrag = (e) => {
     if (e.clientX) {
@@ -92,8 +134,9 @@ const OuterBox = () => {
   };
   return (
     <>
+      <div>Góc đã quay {Math.floor(initRotate)}</div>
       <div
-        className={'outerStroke ' + transformType}
+        className={"outerStroke " + transformType}
         id="outerStroke"
         style={{
           left: boxPosition.x,
@@ -101,8 +144,9 @@ const OuterBox = () => {
           width: Math.abs(position.B.x - position.A.x),
           height: Math.abs(position.D.y - position.A.y),
           position: "absolute",
+          transform: `rotate(${initRotate}deg)`,
         }}
-        onDrag={handleDrag}
+        // onDrag={handleDrag}
         onDragStart={(e) => console.log(e)}
         draggable="true"
       >
@@ -111,6 +155,9 @@ const OuterBox = () => {
             width={Math.abs(position.B.x - position.A.x)}
             height={Math.abs(position.D.y - position.A.y)}
           />
+        </div>
+        <div onDrag={handleRotate} draggable="true">
+          Cầm cái này để quay
         </div>
       </div>
       {renderPoint().map((value, index) => (
